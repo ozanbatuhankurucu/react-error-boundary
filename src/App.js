@@ -1,25 +1,34 @@
-import logo from './logo.svg';
-import './App.css';
+import './App.css'
+import { ErrorBoundary } from 'react-error-boundary'
+import { useState } from 'react'
 
-function App() {
+function ErrorFallback({ error, componentStack, resetErrorBoundary }) {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div role='alert'>
+      <p>Something went wrong:</p>
+      <pre>{error.message}</pre>
+      <pre>{componentStack}</pre>
+      <button onClick={resetErrorBoundary}>Try again</button>
     </div>
-  );
+  )
 }
 
-export default App;
+function Bomb() {
+  throw new Error('💥 KABOOM 💥')
+}
+function App() {
+  const [explode, setExplode] = useState(false)
+  return (
+    <div>
+      <button onClick={() => setExplode((e) => !e)}>toggle explode</button>
+      <ErrorBoundary
+        FallbackComponent={ErrorFallback}
+        onReset={() => setExplode(false)}
+        resetKeys={[explode]}>
+        {explode ? <Bomb /> : null}
+      </ErrorBoundary>
+    </div>
+  )
+}
+
+export default App
